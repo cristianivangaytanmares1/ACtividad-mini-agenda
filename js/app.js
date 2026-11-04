@@ -734,3 +734,46 @@ window.addEventListener('online', handleStateChange);
 // Cuando se pierde la conexión,
 // actualizamos el indicador.
 window.addEventListener('offline', handleStateChange);
+
+
+// ============================================================
+// INSTALACIÓN DE LA APLICACIÓN (PWA)
+// ============================================================
+
+let deferredInstallPrompt = null;
+const installButton = document.getElementById("installApp");
+
+// El navegador avisa cuando la aplicación puede instalarse.
+window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+
+    if (installButton) {
+        installButton.hidden = false;
+    }
+});
+
+// Mostrar el diálogo de instalación al presionar el botón.
+if (installButton) {
+    installButton.addEventListener("click", async () => {
+        if (!deferredInstallPrompt) return;
+
+        deferredInstallPrompt.prompt();
+        const choice = await deferredInstallPrompt.userChoice;
+
+        console.log("Resultado de instalación:", choice.outcome);
+
+        deferredInstallPrompt = null;
+        installButton.hidden = true;
+    });
+}
+
+// Ocultar el botón cuando ya esté instalada.
+window.addEventListener("appinstalled", () => {
+    if (installButton) {
+        installButton.hidden = true;
+    }
+
+    deferredInstallPrompt = null;
+    console.log("Aplicación instalada correctamente.");
+});
