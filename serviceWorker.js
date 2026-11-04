@@ -1,99 +1,62 @@
-// ============================================================
-// RECURSOS QUE SE GUARDARÁN EN CACHE
-// ============================================================
 
-// Array de recursos que queremos cachear.
-//
-// Estos archivos se guardarán en la memoria caché del navegador
-// para que la aplicación pueda acceder a ellos incluso
-// cuando no exista conexión a Internet.
-const assets = [
+const CACHE_NAME = "my-todo-list-v1";
 
-    // Página principal de la aplicación.
-    "index.html",
-
-    // Archivo CSS utilizado por la aplicación.
-    "styles/styles.min.css",
-
-    // Archivo JavaScript principal de la aplicación.
-    "js/app.js"
-
+const ASSETS = [
+    "./",
+    "./index.html",
+    "./manifest.json",
+    "./styles/styles.min.css",
+    "./js/app.js",
+    "./assets/icons/icon-192x192.png",
+    "./assets/icons/icon-256x256.png",
+    "./assets/icons/icon-384x384.png",
+    "./assets/icons/icon-512x512.png"
 ];
 
+// INSTALACIÓN
+self.addEventListener("install", event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(ASSETS))
+            .then(() => self.skipWaiting())
+    );
+});
 
-// ============================================================
-// INSTALACIÓN DEL SERVICE WORKER
-// ============================================================
+// ACTIVACIÓN
+self.addEventListener("activate", event => {
+    event.waitUntil(
+        caches.keys()
+            .then(keys => Promise.all(
+                keys
+                    .filter(key => key !== CACHE_NAME)
+                    .map(key => caches.delete(key))
+            ))
+            .then(() => self.clients.claim())
+    );
+});
 
-// Instalamos el Service Worker.
-//
-// "self" representa al propio Service Worker,
-// permitiendo acceder a su contexto y eventos.
-self
+// FUNCIONAMIENTO SIN INTERNET
+self.addEventListener("fetch", event => {
+    const request = event.request;
 
-    // Escuchamos el evento "install", que ocurre
-    // cuando el Service Worker se instala.
-    .addEventListener("install", installEvent => {
+    if (
+        request.method !== "GET" ||
+        new URL(request.url).origin !== self.location.origin
+    ) {
+        return;
+    }
 
-        // waitUntil() mantiene el proceso de instalación
-        // activo hasta que termine la operación indicada.
-        installEvent.waitUntil(
+    event.respondWith(
+        caches.match(request).then(cachedResponse => {
+            if (cachedResponse) {
+                return cachedResponse;
+            }
 
-            // Abrimos o creamos una caché llamada
-            // "my-todo-list-0".
-            caches.open("my-todo-list-0").then(cache => {
+            if (request.mode === "navigate") {
+                return caches.match("./index.html");
+            }
 
-                // Agregamos todos los recursos definidos
-                // anteriormente en el array "assets"
-                // a la caché.
-                cache.addAll(assets)
-
-            })
-
-        )
-
-    });
-
-
-// ============================================================
-// EVENTO FETCH
-// ============================================================
-
-// Escuchamos todas las solicitudes de recursos
-// que realiza la aplicación.
-self.addEventListener("fetch", fetchEvent => {
-
-    // Esta línea está comentada originalmente.
-    // Se podría utilizar para mostrar en consola
-    // cada evento de solicitud.
-    //console.log("📡 Fetch Event: ", fetchEvent);
-
-
-    // respondWith() permite controlar la respuesta
-    // que recibirá el navegador para cada solicitud.
-    fetchEvent.respondWith(
-
-        // Buscamos primero la solicitud dentro
-        // de la caché.
-        caches.match(fetchEvent.request).then(res => {
-
-            // Esta línea también está comentada originalmente.
-            // Podría utilizarse para mostrar en consola
-            // información sobre los recursos encontrados
-            // en la caché.
-            //console.log("  📦 From Cache: ", caches, caches.match(fetchEvent.request), res);
-
-
-            // Si el recurso existe en la caché,
-            // devolvemos ese recurso.
-            //
-            // Si no existe (res es undefined),
-            // realizamos una solicitud normal
-            // a Internet mediante fetch().
-            return res || fetch(fetchEvent.request)
-
+            return fetch(request);
         })
-
-    )
-
-})
+    );
+});
