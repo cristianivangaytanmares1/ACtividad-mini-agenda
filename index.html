@@ -44,23 +44,35 @@
             <h1>ToDo App</h1>
 
             <!-- Muestra el estado de conexión -->
-            <div id="title-bar-status-indicator" class="status">
-                Offline
-            </div>
+           <div
+    id="title-bar-status-indicator"
+    class="status"
+    role="status"
+    aria-live="polite"
+    title="Estado de conexión a Internet">
+
+    Comprobando conexión...
+
+</div>
         </header>
 
         <!-- Botones de configuración de la aplicación -->
         <div class="title-bar-buttons no-drag">
 
             <!-- Botón para activar pantalla completa -->
-            <button id="fullscreenBtn" class="title-bar-button">
-                📺
-            </button>
+            <button
+    id="fullscreenBtn"
+    class="title-bar-button"
+    title="Activar o salir de pantalla completa"
+    aria-label="Pantalla completa">
+</button>
 
-            <!-- Botón para cambiar el tema -->
-            <button id="themeSwitcher" class="title-bar-button">
-                ssss
-            </button>
+         <button
+    id="themeSwitcher"
+    class="title-bar-button"
+    title="Cambiar entre tema claro y oscuro"
+    aria-label="Cambiar tema">
+</button>
 
         </div>
     </div>
