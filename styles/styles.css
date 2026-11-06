@@ -473,6 +473,53 @@ body main form input {
     width: 100%;
   }
 }
+/* ==========================================
+   MEJORAS DEL INDICADOR DE INTERNET
+========================================== */
+
+#title-bar-status-indicator {
+    display: inline-block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    min-width: 85px;
+    text-align: center;
+    overflow: visible !important;
+}
+
+#title-bar-status-indicator.online {
+    background-color: forestgreen !important;
+    color: white !important;
+}
+
+#title-bar-status-indicator.offline {
+    background-color: darkred !important;
+    color: white !important;
+}
+
+/* ==========================================
+   EXPLICACIONES DE LOS BOTONES
+========================================== */
+
+#titleBar .title-bar-button {
+    position: relative;
+    cursor: pointer;
+}
+
+#titleBar .title-bar-button:hover::after {
+    content: attr(title);
+    position: absolute;
+    top: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #222;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 9999;
+    pointer-events: none;
+}
 
 /* Mapa generado automáticamente por el compilador de CSS */
  /*# sourceMappingURL=styles.css.map */
