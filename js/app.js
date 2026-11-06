@@ -483,30 +483,32 @@ function setTheme(val) {
 function handleStateChange() {
 
     const indicador = document.getElementById(
-        'title-bar-status-indicator'
+        "title-bar-status-indicator"
     );
 
-    if (!indicador) return;
+    if (!indicador) {
+        console.error("No se encontró el indicador de conexión");
+        return;
+    }
 
-    if (navigator.onLine) {
+    const conectado = navigator.onLine;
 
-        indicador.textContent = 'En línea';
+    if (conectado) {
 
-        indicador.classList.remove('offline');
-        indicador.classList.add('online');
-
-        indicador.title = 'Tu dispositivo tiene conexión a Internet';
+        indicador.textContent = "En línea";
+        indicador.classList.remove("offline");
+        indicador.classList.add("online");
+        indicador.title = "El navegador detecta conexión de red";
 
     } else {
 
-        indicador.textContent = 'Sin conexión';
-
-        indicador.classList.remove('online');
-        indicador.classList.add('offline');
-
-        indicador.title = 'Se perdió la conexión a Internet';
-
+        indicador.textContent = "Sin conexión";
+        indicador.classList.remove("online");
+        indicador.classList.add("offline");
+        indicador.title = "El navegador detecta que no hay conexión de red";
     }
+
+    console.log("Estado de conexión:", conectado);
 }
 
 
@@ -785,12 +787,10 @@ window.addEventListener("load", () => {
 
 // Cuando el navegador detecta que vuelve la conexión,
 // actualizamos el indicador.
-window.addEventListener('online', handleStateChange);
+window.addEventListener("online", handleStateChange);
+window.addEventListener("offline", handleStateChange);
 
-// Cuando se pierde la conexión,
-// actualizamos el indicador.
-window.addEventListener('offline', handleStateChange);
-
+window.addEventListener("load", handleStateChange);
 
 // ============================================================
 // INSTALACIÓN DE LA APLICACIÓN (PWA)
