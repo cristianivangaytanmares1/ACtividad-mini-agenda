@@ -3,11 +3,12 @@
 // ============================================================
 
 // Obtenemos los elementos HTML que utilizaremos desde JavaScript.
-newTaskInput = document.getElementById("newTaskInput");
-addBtn = document.getElementById("addBtn");
-list = document.getElementById("list");
-fullscreenBtn = document.getElementById("fullscreenBtn");
-theme = document.getElementById("themeSwitcher");
+const newTaskInput = document.getElementById("newTaskInput");
+const addBtn = document.getElementById("addBtn");
+const list = document.getElementById("list");
+const fullscreenBtn = document.getElementById("fullscreenBtn");
+const theme = document.getElementById("themeSwitcher");
+const titleBar = document.getElementById("titleBar");
 
 // Array donde se almacenan las tareas de la aplicación.
 let tasks = [];
@@ -133,9 +134,14 @@ const agregarTarea = (task) => {
         `
         <input type="checkbox" onclick="marcarTarea(this)" ${task.completado ? 'checked' : ''}>
         <p>${task.texto}</p>
-        <button class="button" onclick="copiarTarea(this)">📋</button>
-        <button class="button" onclick="compartirTarea(this)">✉️</button>
-        <button class="button" onclick="eliminarTarea(this)">🗑️</button>
+        <button class="button" title="Copiar tarea"
+    onclick="copiarTarea(this)">📋</button>
+
+<button class="button" title="Compartir tarea"
+    onclick="compartirTarea(this)">✉️</button>
+
+<button class="button" title="Eliminar tarea"
+    onclick="eliminarTarea(this)">🗑️</button>
         `;
 
     // Agregamos el elemento creado al comienzo de la lista.
@@ -197,23 +203,77 @@ const marcarTarea = (e) => {
 // ============================================================
 
 // Método para copiar la tarea en el portapapeles.
-const copiarTarea = (e) => {
+async function copiarTarea(boton) {
 
-    // Comprobamos si el navegador dispone de Clipboard API.
-    if (navigator.clipboard != undefined) {
+    const tarea = boton.parentElement.querySelector('p');
 
-        // Obtenemos el texto de la tarea y lo copiamos
-        // al portapapeles.
-        navigator.clipboard.writeText(
-            e.parentElement.children[1].innerText
-        )
+    if (!tarea) return;
 
-        // Si la copia fue exitosa...
-        .then(() => console.log("😊 Copiado!"))
+    const texto = tarea.textContent.trim();
 
-        // Si ocurrió un error...
-        .catch(err => console.error("😭 Error al copiar!", err));
+    try {
+
+        await navigator.clipboard.writeText(texto);
+
+        mostrarAviso('¡Tarea copiada correctamente!');
+
+    } catch (error) {
+
+        // Método alternativo para copiar el texto
+        const campo = document.createElement('textarea');
+
+        campo.value = texto;
+
+        document.body.appendChild(campo);
+
+        campo.select();
+
+        const copiado = document.execCommand('copy');
+
+        document.body.removeChild(campo);
+
+        if (copiado) {
+            mostrarAviso('¡Tarea copiada correctamente!');
+        } else {
+            mostrarAviso('No se pudo copiar la tarea');
+        }
+
     }
+}
+function mostrarAviso(mensaje) {
+
+    let aviso = document.getElementById('mensaje-aviso');
+
+    if (!aviso) {
+
+        aviso = document.createElement('div');
+
+        aviso.id = 'mensaje-aviso';
+
+        document.body.appendChild(aviso);
+
+    }
+
+    aviso.textContent = mensaje;
+
+    aviso.style.position = 'fixed';
+    aviso.style.bottom = '25px';
+    aviso.style.right = '25px';
+    aviso.style.background = '#222';
+    aviso.style.color = '#fff';
+    aviso.style.padding = '12px 20px';
+    aviso.style.borderRadius = '8px';
+    aviso.style.zIndex = '9999';
+    aviso.style.fontSize = '14px';
+
+    aviso.style.display = 'block';
+
+    setTimeout(() => {
+
+        aviso.style.display = 'none';
+
+    }, 2500);
+
 }
 
 
@@ -236,7 +296,7 @@ const compartirTarea = (e) => {
     }
 
     // Obtenemos el texto de la tarea.
-    text = e.parentElement.children[1].innerText;
+    const text = e.parentElement.children[1].innerText;
 
     // Utilizamos la API de compartir del navegador.
     navigator.share({
@@ -420,36 +480,32 @@ function setTheme(val) {
 
 // Método para escuchar el estado de la conexión
 // a internet (online/offline).
-const handleStateChange = () => {
+function handleStateChange() {
 
-    // Obtenemos el indicador de estado que aparece
-    // en la barra superior de la aplicación.
-    const indicator = document.getElementById(
-        "title-bar-status-indicator"
+    const indicador = document.getElementById(
+        'title-bar-status-indicator'
     );
 
-    // Comprobamos si el navegador tiene conexión.
+    if (!indicador) return;
+
     if (navigator.onLine) {
 
-        // Mostramos "Online".
-        indicator.innerHTML = "Online";
+        indicador.textContent = 'En línea';
 
-        // Agregamos la clase visual online.
-        indicator.classList.add("online");
+        indicador.classList.remove('offline');
+        indicador.classList.add('online');
 
-        // Quitamos la clase visual offline.
-        indicator.classList.remove("offline");
+        indicador.title = 'Tu dispositivo tiene conexión a Internet';
 
     } else {
 
-        // Mostramos "Offline".
-        indicator.innerHTML = "Offline";
+        indicador.textContent = 'Sin conexión';
 
-        // Agregamos la clase visual offline.
-        indicator.classList.add("offline");
+        indicador.classList.remove('online');
+        indicador.classList.add('offline');
 
-        // Quitamos la clase visual online.
-        indicator.classList.remove("online");
+        indicador.title = 'Se perdió la conexión a Internet';
+
     }
 }
 
